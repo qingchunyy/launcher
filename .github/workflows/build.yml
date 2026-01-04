@@ -13,13 +13,11 @@ jobs:
           [
             {
               lbranch: "4.0.0-DEV",
-              dotnet: 9,
+              dotnet: 10.0.100-rc.1,
             }
           ]
 
     runs-on: ubuntu-latest
-    container:
-      image: refringe/spt-build-dotnet:2.0.2
     steps:
       - uses: actions/checkout@v4
 
