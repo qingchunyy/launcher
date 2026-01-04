@@ -56,7 +56,7 @@ Write-Output "Current HEAD is at $Head in $Branch committed at $CTimeS"
 Write-Output "build"
 Set-Location ./project
 dotnet restore
-dotnet build SPT.Build -c Release -p:SelfContained=false
+dotnet build
 
 if ($LASTEXITCODE -ne 0) {
     throw ("dotnet build failed, exit code $LASTEXITCODE")
