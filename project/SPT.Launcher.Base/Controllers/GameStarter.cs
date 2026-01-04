@@ -263,7 +263,7 @@ namespace SPT.Launcher
             var files = new []
             {
                 GetFileForCleanup("BattlEye", gamePath),
-                GetFileForCleanup("Logs", gamePath),
+                // GetFileForCleanup("Logs", gamePath),
                 GetFileForCleanup("ConsistencyInfo", gamePath),
                 GetFileForCleanup("EscapeFromTarkov_BE.exe", gamePath),
                 GetFileForCleanup("Uninstall.exe", gamePath),
