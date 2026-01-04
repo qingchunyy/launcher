@@ -13,7 +13,7 @@ jobs:
           [
             {
               lbranch: "4.0.0-DEV",
-              dotnet: 10.0.100-rc.1,
+              dotnet: 10,
             }
           ]
 
