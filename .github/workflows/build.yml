@@ -18,7 +18,8 @@ jobs:
           ]
 
     runs-on: ubuntu-latest
-
+    container:
+      image: refringe/spt-build-dotnet:2.0.2
     steps:
       - uses: actions/checkout@v4
 
