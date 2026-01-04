@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <RootNamespace>SPT.Launcher</RootNamespace>
+        <SelfContained>false</SelfContained>
     </PropertyGroup>
 
     <ItemGroup>
