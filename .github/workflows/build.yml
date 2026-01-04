@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - '4.0.0-DEV'
-    paths:
-      - '**.ps1'
-      - '.github/workflows/build.yml'
   pull_request:
   workflow_dispatch:
 
