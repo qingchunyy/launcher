@@ -1,0 +1,118 @@
+name: Build SPT Projects
+
+on:
+  push:
+    branches:
+      - 'master'
+    paths:
+      - '**.ps1'
+      - '.github/workflows/build.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  job2:
+    name: Build Windows SPT Packages
+    strategy:
+      fail-fast: false
+      matrix:
+        versions:
+          [
+            {
+              sbranch: "develop",
+              lbranch: "4.0.0-DEV",
+              mbranch: "4.0.x-dev",
+              version: "0.16.9.0.40087",
+              dotnet: 9,
+              v4: true,
+              v4Flag: "-IsV4"
+            }
+            # {
+            #   sbranch: "4.1.x-dev",
+            #   lbranch: "4.1.x-dev",
+            #   mbranch: "4.1.x-dev",
+            #   version: "0.16.9.0.40087",
+            #   dotnet: 10,
+            #   v4: true,
+            #   v4Flag: "-IsV4"
+            # }
+          ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        if: ${{!matrix.versions.v4}}
+        with:
+          node-version: 22
+      
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{matrix.versions.dotnet}}
+
+      - name: Build SPT Node Server
+        id: build_node_server
+        if: ${{!matrix.versions.v4}}
+        shell: pwsh
+        run: ./build_server.ps1 -Overwrite -NoZip -Branch ${{ matrix.versions.sbranch }} -Release
+   
+      - name: Build SPT .NET Server
+        id: build_csharp_server
+        if: ${{matrix.versions.v4}}
+        shell: pwsh
+        run: ./build_server_csharp.ps1 -Overwrite -NoZip -Branch ${{ matrix.versions.sbranch }} -Runtime win-x64 -Release
+
+      - name: Build SPT Modules
+        id: build_modules
+        shell: pwsh
+        run: ./build_modules.ps1 -Overwrite -NoZip -Branch ${{ matrix.versions.mbranch }} -Url ${{ secrets.DLL_URL }} -TarkovVersion ${{ matrix.versions.version }} -SPTVersion ${{ steps.build_csharp_server.outputs.SPT_VERSION }}
+
+      - name: Build SPT Launcher
+        id: build_launcher
+        shell: pwsh
+        run: ./build_launcher.ps1 -Overwrite -Branch ${{ matrix.versions.lbranch }}
+
+      - name: Make Final Package
+        id: build_package
+        shell: pwsh
+        run: .\build_full_package.ps1 -Overwrite ${{ matrix.versions.v4Flag }} -PkgOnly -NoZip
+
+      - uses: actions/upload-artifact@v4
+        if: ${{!matrix.versions.v4}}
+        with:
+          name: ${{ steps.build_node_server.outputs.ZIP_NAME }}
+          path: './Server/project/build/*'
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 9
+          
+      - uses: actions/upload-artifact@v4
+        if: ${{matrix.versions.v4}}
+        with:
+          name: ${{ steps.build_csharp_server.outputs.ZIP_NAME }}
+          path: './server-csharp/Build/*'
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 9
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build_modules.outputs.ZIP_NAME }}
+          path: './Modules/project/Build/*'
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 9
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build_package.outputs.ZIP_NAME }}
+          path: "./output/*"
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 9
